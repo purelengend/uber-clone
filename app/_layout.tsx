@@ -3,11 +3,18 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
+import { tokenCache } from '@/cache'
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+  if (!publishableKey) {
+    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file");
+  }
+
   const [loaded] = useFonts({
     "Jakarta-Bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
     "Jakarta-ExtraBold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
@@ -29,29 +36,33 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-          headerTitleAlign: "center",
-        }}
-      />
-      <Stack.Screen
-        name="(auth)"
-        options={{
-          headerShown: false,
-          headerTitleAlign: "center",
-        }}
-      />
-      <Stack.Screen
-        name="(root)"
-        options={{
-          headerShown: false,
-          headerTitleAlign: "center",
-        }}
-      />
-      <Stack.Screen name="+not-found" />
-    </Stack>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+      <ClerkLoaded>
+        <Stack>
+          <Stack.Screen
+            name="index"
+            options={{
+              headerShown: false,
+              headerTitleAlign: "center",
+            }}
+          />
+          <Stack.Screen
+            name="(auth)"
+            options={{
+              headerShown: false,
+              headerTitleAlign: "center",
+            }}
+          />
+          <Stack.Screen
+            name="(root)"
+            options={{
+              headerShown: false,
+              headerTitleAlign: "center",
+            }}
+          />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </ClerkLoaded>
+    </ClerkProvider>
   );
 }
